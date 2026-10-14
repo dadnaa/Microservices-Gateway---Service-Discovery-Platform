@@ -1,0 +1,40 @@
+server:
+  port: 7777
+
+logging:
+  level:
+    org.springframework.cloud.gateway: TRACE
+
+eureka:
+  client:
+    fetch-registry: true
+    register-with-eureka: true
+    service-url:
+      defaultZone: http://localhost:8888/eureka
+
+spring:
+  application:
+    name: ms-gateway
+
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: route1
+              uri: lb://ms-formation
+              predicates:
+                - Path=/service-formation/**
+              filters:
+                - RewritePath=/service-formation/(?<s>.*), /${s}
+                - name: CircuitBreaker
+                  args:
+                    name: fallbackFormation
+                    fallbackUri: forward:/defaultFormations
+
+            - id: route2
+              uri: lb://ms-scolarite
+              predicates:
+                - Path=/service-scolarite/**
+              filters:
+                - RewritePath=/service-scolarite/(?<s>.*), /${s}

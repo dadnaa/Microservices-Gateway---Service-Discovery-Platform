@@ -1,0 +1,37 @@
+services:
+  eureka-server:
+    image : ms-registry
+    ports:
+      - 8888:8888
+  gateway-service:
+    image : ms-gateway
+    depends_on :
+      - eureka-server
+    ports:
+      - 7777:7777
+    environment:
+      PROFILE: "default"
+      eureka.client.serviceUrl.defaultZone: "http://eureka-server:8888/eureka/"
+    restart: on-failure
+  ms-formation-service:
+    image: ms-formation
+    depends_on :
+      - eureka-server
+      - gateway-service
+    environment:
+      PROFILE: "default"
+      eureka.client.serviceUrl.defaultZone: "http://eureka-server:8888/eureka/"
+    ports:
+      - 8084:8084
+    restart: on-failure
+  ms-scolarite-service:
+    image: ms-scolarite
+    depends_on :
+      - eureka-server
+      - gateway-service
+    environment:
+      PROFILE: "default"
+      eureka.client.serviceUrl.defaultZone: "http://eureka-server:8888/eureka/"
+    ports:
+      - 8083:8083
+    restart: on-failure
